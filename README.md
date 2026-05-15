@@ -1,6 +1,12 @@
 # JVM Memory Monitoring Tool
 
-A simple Java Swing application that monitors the JVM heap, available memory, and garbage collection activity. The tool uses `Runtime.getRuntime()`, `System.gc()`, and JVM memory statistics to display a Task Manager-style memory status window.
+A comprehensive Java Swing application that monitors all JVM memory partitions including heap, non-heap, memory pools, and buffer pools. The tool uses `Runtime.getRuntime()`, `System.gc()`, and various MXBeans to display detailed memory status in a Task Manager-style window.
+
+## Documentation
+
+- **[JVM_MEMORY_MANAGEMENT.md](JVM_MEMORY_MANAGEMENT.md)** - Comprehensive guide to JVM internals, memory management, and garbage collection concepts
+- **[OBJECT_CREATION_EMULATION.md](OBJECT_CREATION_EMULATION.md)** - Step-by-step guide for using object creation simulation
+- **[QUICK_START.md](QUICK_START.md)** - Quick reference for getting started with memory monitoring
 
 ## Build & Run
 
@@ -30,15 +36,17 @@ Or use the included run script:
 
 ## Features
 
-- **Memory Display**: Shows heap total, used, free, and max memory in real-time
-- **GC Monitoring**: Displays garbage collection call count from all GC beans
+- **Complete Memory Monitoring**:
+  - Heap memory (Eden, Survivor, Old Generation)
+  - Non-heap memory (Metaspace, Code Cache, etc.)
+  - Direct and mapped buffer memory
+  - All JVM memory pools with usage indicators
+
+- **Real-time Updates**: Refreshes every second with live JVM memory statistics
+- **Visual Indicators**: Color-coded progress bars (green < 60%, orange 60-80%, red > 80%)
 - **Object Simulation**: Allocate objects on-demand to observe heap growth
-- **Allocated Objects Tracking**: Shows number of simulated objects and their memory footprint
-- **Live Heap Progress Bar**: Visual indicator (green < 60%, orange 60-80%, red > 80%)
-- **Manual Controls**:
-  - **Create 10 Objects**: Allocates ~100KB objects per click to simulate heap growth
-  - **Trigger GC**: Manually calls `System.gc()` to request garbage collection
-  - **Clear Objects**: Releases all allocated objects to show memory reclamation
+- **Manual GC Control**: Trigger garbage collection to see memory reclamation
+- **Detailed Pool Information**: Shows usage for all memory pools and buffer pools
 
 ## How to Use Object Creation Simulation
 
