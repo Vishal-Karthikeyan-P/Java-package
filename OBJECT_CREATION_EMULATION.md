@@ -2,20 +2,38 @@
 
 This guide demonstrates how to use the JVM Memory Monitoring Tool to simulate object creation and observe real-time memory changes.
 
+## Setup: Running with Limited Heap (Recommended)
+
+To see meaningful memory changes when creating objects, run the tool with a limited heap:
+
+```bash
+java -Xmx512m -cp out com.example.jvmmemory.MemoryMonitor
+```
+
+**Why:** By default, the JVM may use a heap of several GB. With 10MB objects, you'd need 100+ objects to see a change. With a 512MB limit, each button click (~100MB) is immediately visible.
+
+You can adjust the limit:
+- `-Xmx256m` - very tight, see changes with 3 clicks
+- `-Xmx512m` - balanced (recommended)
+- `-Xmx1024m` - looser, more room to experiment
+
+---
+
 ## Scenario 1: Observe Heap Growth with Object Creation
 
 ### Steps:
-1. Launch the application: `java -cp out com.example.jvmmemory.MemoryMonitor`
-2. Note the initial **Heap Used** and **Heap Max** values
-3. Click **Create 10 Objects** - watch the heap usage increase in real-time
-4. Repeat clicking several times to allocate more objects
+1. Launch the application: `java -Xmx512m -cp out com.example.jvmmemory.MemoryMonitor`
+2. Note the initial **Heap Used** and **Heap Max** (should show ~512 MB max)
+3. Click **Create 10 Objects** - watch the heap usage increase significantly (~100MB per click with 512MB heap)
+4. Repeat clicking 3-5 times to fill the heap
 5. Observe the progress bar color changing from green → orange → red as heap fills
 
 ### Expected Results:
 - **Allocated Objects** counter increments by 10 each click
-- **Simulated Memory** shows cumulative size (~1 MB per 10 objects)
-- **Heap Used** increases as objects are allocated
-- Progress bar fills up, changing color based on usage percentage
+- **Simulated Memory** shows cumulative size (~100 MB per 10 objects)
+- **Heap Used** increases noticeably after each click (now visible with limited heap)
+- Progress bar fills up quickly, changing color based on usage percentage
+- After 5 clicks, heap should be nearly full (~500MB of 512MB)
 
 ---
 
@@ -87,9 +105,13 @@ This guide demonstrates how to use the JVM Memory Monitoring Tool to simulate ob
 
 ## Performance Observations
 
-- Each simulated object is approximately **100KB**
+- Each simulated object is approximately **10MB** (previously 100KB, increased for visibility)
 - Objects are created with a **50ms delay** to allow real-time observation
 - Heap updates occur **every 1 second**
+- With `-Xmx512m` heap limit:
+  - 10 objects = ~100MB (visible change)
+  - 25 objects = ~250MB (half full)
+  - 50 objects = ~500MB (nearly full)
 - The progress bar color indicates memory pressure:
   - **Green**: < 60% used (healthy)
   - **Orange**: 60-80% used (caution)
@@ -122,12 +144,18 @@ This guide demonstrates how to use the JVM Memory Monitoring Tool to simulate ob
 # Build the project
 ./build.sh
 
-# Run the monitor
+# Run with default heap
 java -cp out com.example.jvmmemory.MemoryMonitor
+
+# Run with limited heap (RECOMMENDED for better visualization)
+java -Xmx512m -cp out com.example.jvmmemory.MemoryMonitor
+
+# Or use the run script
+./run.sh
 ```
 
 Or manually:
 ```bash
 javac -d out src/com/example/jvmmemory/*.java
-java -cp out com.example.jvmmemory.MemoryMonitor
+java -Xmx512m -cp out com.example.jvmmemory.MemoryMonitor
 ```

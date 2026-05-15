@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class ObjectCreationSimulator {
 
-    private static final int OBJECT_SIZE = 1024 * 100; // ~100KB per dummy object
+    private static final int OBJECT_SIZE = 1024 * 1024 * 10; // ~10MB per dummy object
     private final List<byte[]> allocatedObjects = new ArrayList<>();
     private boolean isSimulating = false;
 

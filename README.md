@@ -10,10 +10,22 @@ Compile the application:
 javac -d out src/com/example/jvmmemory/MemoryMonitor.java
 ```
 
-Run the tool:
+Run the tool with default heap (system dependent):
 
 ```bash
 java -cp out com.example.jvmmemory.MemoryMonitor
+```
+
+**Recommended: Run with limited heap** for better memory visualization:
+
+```bash
+java -Xmx512m -cp out com.example.jvmmemory.MemoryMonitor
+```
+
+Or use the included run script:
+
+```bash
+./run.sh
 ```
 
 ## Features
@@ -37,11 +49,27 @@ java -cp out com.example.jvmmemory.MemoryMonitor
 
 ## Technical Details
 
-- Each simulated object is ~100KB (byte array allocation)
+- Each simulated object is **~10MB** (byte array allocation) - increased from 100KB to make memory changes visible
 - Objects are created in a separate thread with 50ms delay between allocations
 - The simulator tracks both object count and estimated memory usage
 - Updates refresh every 1 second to show real-time changes
 - Uses `ManagementFactory.getGarbageCollectorMXBeans()` for accurate GC statistics
+- **Recommended to run with limited heap** (`-Xmx512m`) to see meaningful memory changes with fewer objects
+
+## Memory Limiting Explained
+
+By default, the JVM uses a large heap (often 1/4 of system RAM). This means creating even 150 objects (1.5GB total) won't visibly impact the heap. The included `run.sh` script limits the heap to 512MB:
+
+```bash
+java -Xmx512m -cp out com.example.jvmmemory.MemoryMonitor
+```
+
+This means:
+- 10 objects = ~100MB (visible change)
+- 20 objects = ~200MB (40% of heap)
+- 50 objects = ~500MB (nearly full heap, progress bar turns orange/red)
+
+You can adjust the heap limit by changing `-Xmx512m` to any value (e.g., `-Xmx256m` for tighter limits, `-Xmx1024m` for more space).
 
 ## Notes
 
