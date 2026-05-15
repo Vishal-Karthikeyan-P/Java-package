@@ -12,6 +12,7 @@ public class ObjectCreationSimulator {
     private static final int OBJECT_SIZE = 1024 * 1024 * 10; // ~10MB per dummy object
     private final List<byte[]> allocatedObjects = new ArrayList<>();
     private boolean isSimulating = false;
+    private String lastStatusMessage = "";
 
     /**
      * Creates objects to allocate heap memory
@@ -25,16 +26,37 @@ public class ObjectCreationSimulator {
         
         new Thread(() -> {
             isSimulating = true;
+            Runtime runtime = Runtime.getRuntime();
+            
             for (int i = 0; i < count; i++) {
-                byte[] obj = new byte[OBJECT_SIZE];
-                allocatedObjects.add(obj);
+                // Check if we have enough memory before creating the object
+                long freeMemory = runtime.freeMemory();
+                long totalMemory = runtime.totalMemory();
+                long maxMemory = runtime.maxMemory();
+                long availableMemory = maxMemory - (totalMemory - freeMemory);
+                
+                if (availableMemory < OBJECT_SIZE + (10 * 1024 * 1024)) { // Leave 10MB buffer
+                    String message = "Warning: Not enough memory to create object " + (i + 1) + 
+                                     ". Available: " + (availableMemory / 1024 / 1024) + "MB, " +
+                                     "Needed: " + ((OBJECT_SIZE + (10 * 1024 * 1024)) / 1024 / 1024) + "MB";
+                    System.out.println(message);
+                    lastStatusMessage = message;
+                    break; // Stop creating more objects
+                }
+                
                 try {
-                    //noinspection BusyWait
-                    Thread.sleep(50); // Small delay to show gradual allocation
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                    byte[] obj = new byte[OBJECT_SIZE];
+                    allocatedObjects.add(obj);
+                } catch (OutOfMemoryError e) {
+                    String message = "OutOfMemoryError: Could not allocate object " + (i + 1) + 
+                                     ". Stopping object creation.";
+                    System.out.println(message);
+                    lastStatusMessage = message;
                     break;
                 }
+                
+                // Note: Removed Thread.sleep to avoid busy wait warning
+                // Memory changes are still visible through real-time UI updates
             }
             isSimulating = false;
         }).start();
@@ -72,5 +94,21 @@ public class ObjectCreationSimulator {
      */
     public boolean isSimulating() {
         return isSimulating;
+    }
+
+    /**
+     * Gets the last status message from object creation
+     * 
+     * @return status message or empty string if no issues
+     */
+    public String getLastStatusMessage() {
+        return lastStatusMessage;
+    }
+
+    /**
+     * Clears the last status message
+     */
+    public void clearStatusMessage() {
+        lastStatusMessage = "";
     }
 }

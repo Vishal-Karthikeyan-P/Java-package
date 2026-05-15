@@ -35,6 +35,7 @@ public final class MemoryMonitor extends JFrame {
     private final JLabel gcCountLabel = new JLabel();
     private final JLabel allocatedObjectsLabel = new JLabel();
     private final JLabel simulatedMemoryLabel = new JLabel();
+    private final JLabel statusLabel = new JLabel();
     private final JProgressBar heapUsageBar = new JProgressBar(0, 100);
 
     private Timer refreshTimer;
@@ -42,7 +43,7 @@ public final class MemoryMonitor extends JFrame {
     public MemoryMonitor() {
         setTitle("JVM Memory Monitor");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(520, 360);
+        setSize(520, 400);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
@@ -68,7 +69,7 @@ public final class MemoryMonitor extends JFrame {
     private JPanel createStatusPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Memory and Garbage Collection Status"));
-        panel.setPreferredSize(new Dimension(500, 230));
+        panel.setPreferredSize(new Dimension(500, 250));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 12, 10, 12);
@@ -140,6 +141,12 @@ public final class MemoryMonitor extends JFrame {
         heapUsageBar.setPreferredSize(new Dimension(450, 28));
         panel.add(heapUsageBar, gbc);
 
+        gbc.gridy++;
+        gbc.insets = new Insets(8, 12, 16, 12);
+        statusLabel.setForeground(Color.RED);
+        statusLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
+        panel.add(statusLabel, gbc);
+
         return panel;
     }
 
@@ -167,6 +174,10 @@ public final class MemoryMonitor extends JFrame {
         allocatedObjectsLabel.setText(objCount + " objects");
         simulatedMemoryLabel.setText(formatMB(simulator.getEstimatedMemoryUsed()));
 
+        // Update status message
+        String statusMessage = simulator.getLastStatusMessage();
+        statusLabel.setText(statusMessage);
+
         heapUsageBar.setValue(percentUsed);
         heapUsageBar.setString(percentUsed + "% used");
         heapUsageBar.setForeground(getBarColor(percentUsed));
@@ -192,12 +203,16 @@ public final class MemoryMonitor extends JFrame {
 
         JButton createObjectsButton = new JButton("Create 10 Objects");
         createObjectsButton.addActionListener(e -> {
+            simulator.clearStatusMessage();
+            statusLabel.setText("");
             simulator.createObjects(10);
         });
 
         JButton clearObjectsButton = new JButton("Clear Objects");
         clearObjectsButton.addActionListener(e -> {
             simulator.clearObjects();
+            simulator.clearStatusMessage();
+            statusLabel.setText("");
             updateStatus();
         });
 
