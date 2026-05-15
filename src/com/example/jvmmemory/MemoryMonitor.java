@@ -7,8 +7,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
@@ -27,6 +25,7 @@ public final class MemoryMonitor extends JFrame {
     private static final DecimalFormat MB_FORMAT = new DecimalFormat("#,##0.0");
     private final Runtime runtime = Runtime.getRuntime();
     private final List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
+    private final ObjectCreationSimulator simulator = new ObjectCreationSimulator();
 
     private final JLabel heapTotalLabel = new JLabel();
     private final JLabel heapUsedLabel = new JLabel();
@@ -34,6 +33,8 @@ public final class MemoryMonitor extends JFrame {
     private final JLabel heapMaxLabel = new JLabel();
     private final JLabel availableLabel = new JLabel();
     private final JLabel gcCountLabel = new JLabel();
+    private final JLabel allocatedObjectsLabel = new JLabel();
+    private final JLabel simulatedMemoryLabel = new JLabel();
     private final JProgressBar heapUsageBar = new JProgressBar(0, 100);
 
     private Timer refreshTimer;
@@ -119,6 +120,20 @@ public final class MemoryMonitor extends JFrame {
 
         gbc.gridy++;
         gbc.gridx = 0;
+        panel.add(new JLabel("Allocated Objects:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(allocatedObjectsLabel, gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(new JLabel("Simulated Memory:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(simulatedMemoryLabel, gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(16, 12, 12, 12);
         heapUsageBar.setStringPainted(true);
@@ -130,27 +145,32 @@ public final class MemoryMonitor extends JFrame {
 
     private JPanel createControlPanel() {
         JButton triggerGcButton = new JButton("Trigger GC");
-        triggerGcButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.gc();
-                updateStatus();
-            }
+        triggerGcButton.addActionListener(e -> {
+            System.gc();
+            updateStatus();
+        });
+
+        JButton createObjectsButton = new JButton("Create 10 Objects");
+        createObjectsButton.addActionListener(e -> {
+            simulator.createObjects(10);
+        });
+
+        JButton clearObjectsButton = new JButton("Clear Objects");
+        clearObjectsButton.addActionListener(e -> {
+            simulator.clearObjects();
+            updateStatus();
         });
 
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
+        panel.add(createObjectsButton);
         panel.add(triggerGcButton);
+        panel.add(clearObjectsButton);
         return panel;
     }
 
     private void startRefreshTimer() {
-        refreshTimer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateStatus();
-            }
-        });
+        refreshTimer = new Timer(1000, e -> updateStatus());
         refreshTimer.start();
     }
 
@@ -168,6 +188,10 @@ public final class MemoryMonitor extends JFrame {
         heapMaxLabel.setText(formatMB(maxHeap));
         availableLabel.setText(formatMB(availableHeap));
         gcCountLabel.setText(String.valueOf(getTotalGcCount()));
+
+        int objCount = simulator.getAllocatedObjectCount();
+        allocatedObjectsLabel.setText(objCount + " objects");
+        simulatedMemoryLabel.setText(formatMB(simulator.getEstimatedMemoryUsed()));
 
         heapUsageBar.setValue(percentUsed);
         heapUsageBar.setString(percentUsed + "% used");
@@ -201,11 +225,9 @@ public final class MemoryMonitor extends JFrame {
     }
 
     public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                MemoryMonitor monitor = new MemoryMonitor();
-                monitor.setVisible(true);
-            }
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            MemoryMonitor monitor = new MemoryMonitor();
+            monitor.setVisible(true);
         });
     }
 }
