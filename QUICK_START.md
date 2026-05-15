@@ -17,37 +17,53 @@ Or use the provided script:
 ./run.sh
 ```
 
-### What You'll See Now (Expanded Monitoring)
+### What You'll See Now
 
-The tool now shows **ALL JVM memory partitions**:
+The tool shows **JVM heap memory** with real-time updates:
 
 #### Heap Memory Panel
 - Total, Used, Free, Max, Available memory
 - Visual progress bar with color coding
+- GC count tracking
 
-#### Non-Heap Memory Panel
-- Used, Committed, Max memory
-- Direct Memory (NIO buffers)
-- Mapped Memory (memory-mapped files)
-- Visual progress bar
-
-#### Memory Pools Display
-- **Eden Space**: New object allocation
-- **Survivor Spaces**: Objects surviving GC
-- **Old Generation**: Long-lived objects
-- **Metaspace**: Class metadata
-- **Code Cache**: Compiled native code
-- **Compressed Class Space**: Class pointers
-
-#### Buffer Pools
-- Direct buffers count and memory usage
-- Mapped buffers count and memory usage
+#### Object Simulation Controls
+- Create 10 Objects (10MB each)
+- Trigger GC manually
+- Clear Objects
 
 ### What You'll See When Creating Objects
 
-| Action | Heap Panel | Memory Pools | Non-Heap |
-|--------|------------|--------------|----------|
-| **Start** | ~0-50MB used | Eden: low usage | Metaspace: class data |
+| Action | Heap Used | Progress Bar | GC Count |
+|--------|-----------|--------------|----------|
+| **Start** | ~0-50MB | Green (0-30%) | 0 |
+| **Create 10 Objects** | ~100MB | Yellow (30-70%) | 0 |
+| **Create 20 Objects** | ~200MB | Orange (70-90%) | 0 |
+| **Create 30 Objects** | ~300MB | Red (90-100%) | 0 |
+| **Trigger GC** | ~50MB | Green | 1+ |
+
+### Key Features Demonstrated
+
+- **Runtime.getRuntime()**: Total, free, max memory
+- **System.gc()**: Manual garbage collection
+- **Real-time monitoring**: Updates every 1 second
+- **Object simulation**: 10MB objects to show memory changes
+- **Heap limiting**: -Xmx512m makes changes visible
+
+### Troubleshooting
+
+**Memory changes not visible?**
+- Use `./run.sh` (limits heap to 512MB)
+- Create multiple batches of objects
+- Trigger GC to see cleanup
+
+**Tool won't start?**
+- Ensure Java 8+ is installed
+- Run `./build.sh` first
+- Check for compilation errors
+
+**Want to see more memory detail?**
+- Read `JVM_MEMORY_MANAGEMENT.md`
+- Read `OBJECT_CREATION_EMULATION.md`
 | **Click "Create 10 Objects"** | +100MB used | Eden: usage ↑ | Unchanged |
 | **5 clicks** | 500MB used | Eden: fills up | Unchanged |
 | **Click "Trigger GC"** | May decrease | Eden clears, Survivors fill | May clean Metaspace |

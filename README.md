@@ -1,6 +1,6 @@
 # JVM Memory Monitoring Tool
 
-A comprehensive Java Swing application that monitors all JVM memory partitions including heap, non-heap, memory pools, and buffer pools. The tool uses `Runtime.getRuntime()`, `System.gc()`, and various MXBeans to display detailed memory status in a Task Manager-style window.
+A simple Java Swing application that monitors the JVM heap, available memory, and garbage collection activity. The tool uses `Runtime.getRuntime()`, `System.gc()`, and JVM memory statistics to display a Task Manager-style memory status window.
 
 ## Documentation
 
